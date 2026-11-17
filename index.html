@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Treino de Avaliação Psicológica</title>
+  <meta name="description" content="Testes curtos de treino: rapidez numérica e percetiva, visualização espacial, séries, códigos, silogismos e matrizes.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Shared SVG pattern for the striped fill in "Matrizes de Figuras" -->
+  <svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <pattern id="psico-stripes" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+        <line x1="1.5" y1="0" x2="1.5" y2="6" stroke="currentColor" stroke-width="2.4"></line>
+      </pattern>
+    </defs>
+  </svg>
+
+  <a class="skip-link" href="#panel">Saltar para as perguntas</a>
+
+  <header class="site-header">
+    <div class="wrap">
+      <h1>Treino de Avaliação Psicológica</h1>
+      <p class="subtitle" id="subtitle">30 perguntas por teste · foco na precisão e, depois, na rapidez</p>
+    </div>
+  </header>
+
+  <nav class="tabs-wrap" aria-label="Testes">
+    <div class="wrap">
+      <div class="tabs" id="tabs" role="tablist" aria-label="Testes disponíveis"></div>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <section class="settings" aria-label="Definições do treino">
+      <label class="switch">
+        <input type="checkbox" id="timer-on" role="switch" aria-describedby="timer-note">
+        <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+        <span>Modo cronometrado</span>
+      </label>
+      <label class="field">
+        <span>Minutos</span>
+        <input type="number" id="timer-min" min="1" max="120" step="1" value="5" inputmode="numeric" aria-label="Minutos da contagem decrescente">
+      </label>
+      <label class="field field-range">
+        <span>Meta de precisão</span>
+        <input type="range" id="target" min="50" max="100" step="1" value="90" aria-label="Meta de precisão em percentagem">
+        <output id="target-out" for="target">90%</output>
+      </label>
+      <p class="note" id="timer-note">A contagem decrescente só corre enquanto o separador do teste está aberto. A meta é apenas um objetivo pessoal de treino.</p>
+      <p class="note warn" id="storage-note" hidden>⚠ Não foi possível guardar o progresso neste navegador: as respostas perdem-se ao recarregar.</p>
+    </section>
+
+    <main id="panel" class="panel" role="tabpanel" tabindex="-1"></main>
+  </div>
+
+  <footer class="bar" aria-label="Pontuação e ações do teste atual">
+    <div class="wrap">
+      <div class="stats-panel" id="stats-panel" hidden>
+        <h2 class="sr-only">Estatísticas do teste atual</h2>
+        <dl class="stats-grid" id="stats-grid"></dl>
+        <p class="goal-line" id="stats-goal"></p>
+      </div>
+      <div class="bar-line" aria-live="polite">
+        <span class="bar-score" id="bar-score">Pontuação: 0 / 0</span>
+        <span id="bar-progress">Respondidas 0 de 30</span>
+        <span id="bar-acc">Precisão —</span>
+        <span id="bar-timer" class="bar-timer" hidden></span>
+        <span id="bar-goal" class="bar-goal"></span>
+      </div>
+      <div class="bar-actions">
+        <button type="button" class="btn" id="btn-stats" aria-expanded="false" aria-controls="stats-panel">Estatísticas</button>
+        <button type="button" class="btn" id="btn-finish" aria-label="Terminar esta tentativa">Terminar</button>
+        <button type="button" class="btn" id="btn-reset" aria-label="Recomeçar o teste atual">Recomeçar</button>
+        <button type="button" class="btn" id="btn-new" aria-label="Gerar um novo conjunto de perguntas para o teste atual">Novo conjunto</button>
+      </div>
+    </div>
+  </footer>
+
+  <script src="generators.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
