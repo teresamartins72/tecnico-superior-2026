@@ -60,7 +60,8 @@
 
   const DEFAULT_SEEDS = {
     numerica: 1101, percetiva: 2202, espacial: 3303, series: 4404,
-    codigos: 5505, silogismos: 6606, matrizes: 7707
+    codigos: 5505, silogismos: 6606, matrizes: 7707,
+    analogias: 8808, sinonimos: 9909, textos: 1212, numerico: 2323, atencao: 3434
   };
 
   /* ================= Test 1: Rapidez Numérica ================= */
@@ -542,14 +543,424 @@
     });
   }
 
+  /* ================= Test 8: Analogias ================= */
+  // [a, b, c, answer, distractors, relation]
+  const ANALOGIES = [
+    ['médico', 'hospital', 'professor', 'escola', ['aluno', 'livro', 'aula', 'quadro'], 'local onde cada profissional trabalha'],
+    ['pássaro', 'ninho', 'abelha', 'colmeia', ['mel', 'flor', 'ferrão', 'enxame'], 'sítio onde cada animal vive'],
+    ['pé', 'sapato', 'mão', 'luva', ['dedo', 'anel', 'braço', 'unha'], 'o que se veste em cada parte do corpo'],
+    ['quente', 'frio', 'alto', 'baixo', ['grande', 'largo', 'comprido', 'magro'], 'palavras de sentido contrário'],
+    ['livro', 'capítulo', 'casa', 'divisão', ['rua', 'morada', 'vizinho', 'cidade'], 'o todo e uma das suas partes'],
+    ['pintor', 'pincel', 'escritor', 'caneta', ['livro', 'leitor', 'romance', 'biblioteca'], 'instrumento de trabalho de cada um'],
+    ['olho', 'ver', 'ouvido', 'ouvir', ['som', 'orelha', 'falar', 'música'], 'função de cada órgão'],
+    ['água', 'sede', 'comida', 'fome', ['prato', 'cozinha', 'sabor', 'mesa'], 'aquilo que satisfaz cada necessidade (a água mata a sede, a comida mata a fome)'],
+    ['carro', 'estrada', 'comboio', 'carril', ['estação', 'bilhete', 'passageiro', 'vagão'], 'por onde circula cada veículo'],
+    ['Lisboa', 'Portugal', 'Madrid', 'Espanha', ['Europa', 'Barcelona', 'capital', 'Andaluzia'], 'capital e respetivo país'],
+    ['lápis', 'escrever', 'tesoura', 'cortar', ['papel', 'colar', 'afiar', 'desenhar'], 'para que serve cada objeto'],
+    ['lobo', 'alcateia', 'abelha', 'enxame', ['colmeia', 'mel', 'rebanho', 'cardume'], 'nome do grupo de cada animal'],
+    ['ovelha', 'rebanho', 'peixe', 'cardume', ['aquário', 'mar', 'escama', 'rede'], 'nome do grupo de cada animal'],
+    ['cão', 'ladrar', 'gato', 'miar', ['uivar', 'cacarejar', 'rugir', 'zurrar'], 'som que cada animal faz'],
+    ['termómetro', 'temperatura', 'balança', 'peso', ['altura', 'tempo', 'volume', 'pressão'], 'o que cada instrumento mede'],
+    ['relógio', 'tempo', 'régua', 'comprimento', ['peso', 'ângulo', 'temperatura', 'volume'], 'o que cada instrumento mede'],
+    ['frio', 'inverno', 'calor', 'verão', ['sol', 'praia', 'chuva', 'estação'], 'característica e estação do ano em que se sente'],
+    ['agulha', 'costureira', 'martelo', 'carpinteiro', ['prego', 'madeira', 'ferramenta', 'serrote'], 'instrumento e quem o usa no trabalho'],
+    ['ler', 'livro', 'ouvir', 'música', ['ouvido', 'ver', 'cantar', 'filme'], 'ação e aquilo sobre que se faz'],
+    ['raro', 'frequente', 'pouco', 'muito', ['escasso', 'único', 'menos', 'algum'], 'palavras de sentido contrário'],
+    ['maquinista', 'comboio', 'piloto', 'avião', ['aeroporto', 'voo', 'hospedeira', 'asa'], 'quem conduz cada veículo'],
+    ['ator', 'teatro', 'advogado', 'tribunal', ['juiz', 'lei', 'processo', 'cliente'], 'local onde cada profissional trabalha'],
+    ['ferro', 'metal', 'rosa', 'flor', ['espinho', 'jardim', 'perfume', 'vermelho'], 'exemplo e categoria a que pertence'],
+    ['triângulo', 'três', 'quadrado', 'quatro', ['cinco', 'seis', 'lado', 'área'], 'figura e número de lados'],
+    ['rápido', 'lento', 'claro', 'escuro', ['luz', 'brilhante', 'transparente', 'branco'], 'palavras de sentido contrário'],
+    ['queijo', 'leite', 'pão', 'farinha', ['padaria', 'forno', 'sanduíche', 'côdea'], 'produto e matéria-prima de que é feito'],
+    ['vinho', 'uva', 'azeite', 'azeitona', ['garrafa', 'salada', 'óleo', 'lagar'], 'produto e fruto de que é feito'],
+    ['escultor', 'estátua', 'compositor', 'sinfonia', ['maestro', 'piano', 'orquestra', 'nota'], 'autor e obra que cria'],
+    ['capitão', 'equipa', 'maestro', 'orquestra', ['música', 'batuta', 'concerto', 'instrumento'], 'quem dirige cada grupo'],
+    ['sol', 'dia', 'lua', 'noite', ['estrela', 'céu', 'mar', 'luz'], 'astro associado a cada período'],
+    ['janeiro', 'mês', 'terça-feira', 'dia', ['semana', 'ano', 'calendário', 'feriado'], 'exemplo e categoria a que pertence (janeiro é um mês, terça-feira é um dia)'],
+    ['faca', 'cortar', 'vassoura', 'varrer', ['chão', 'pó', 'lavar', 'apanhar'], 'para que serve cada objeto'],
+    ['médico', 'doente', 'advogado', 'cliente', ['juiz', 'tribunal', 'lei', 'processo'], 'profissional e pessoa a quem presta serviço'],
+    ['aluno', 'aprender', 'professor', 'ensinar', ['escola', 'estudar', 'aula', 'quadro'], 'atividade principal de cada um'],
+    ['nascer', 'morrer', 'chegar', 'partir', ['vir', 'entrar', 'ficar', 'viajar'], 'palavras de sentido contrário'],
+    ['bombeiro', 'incêndio', 'médico', 'doença', ['hospital', 'enfermeiro', 'receita', 'saúde'], 'o que cada profissional combate'],
+    ['biblioteca', 'livros', 'arquivo', 'documentos', ['pasta', 'gaveta', 'secretaria', 'carimbo'], 'local e o que lá se guarda'],
+    ['ágil', 'agilidade', 'belo', 'beleza', ['bonito', 'feio', 'belíssimo', 'belamente'], 'adjetivo e nome que dele deriva'],
+    ['pintar', 'pintor', 'cantar', 'cantor', ['canção', 'cantoria', 'voz', 'palco'], 'ação e quem a faz'],
+    ['pétala', 'flor', 'dedo', 'mão', ['unha', 'luva', 'braço', 'anel'], 'parte e o todo a que pertence'],
+    ['tecla', 'teclado', 'página', 'livro', ['letra', 'capa', 'leitura', 'estante'], 'parte e o todo a que pertence']
+  ];
+
+  function analogies(seed) {
+    const rng = makeRng(seed);
+    const items = rng.shuffle(range(ANALOGIES.length)).slice(0, N);
+    const positions = balanced(range(5), N, rng);
+    return items.map((k, i) => {
+      const [a, b, c, ans, dis, rel] = ANALOGIES[k];
+      const vals = rng.shuffle(dis);
+      vals.splice(positions[i], 0, ans);
+      return { item: k, a, b, c, rel, correct: ans, options: vals.map((v) => ({ value: v, label: v })) };
+    });
+  }
+
+  /* ================= Test 9: Sinónimos e Antónimos ================= */
+  // [word, answer, distractors, note?]
+  const SYNONYMS = [
+    ['célere', 'rápido', ['lento', 'célebre', 'claro', 'cauteloso']],
+    ['efémero', 'passageiro', ['eterno', 'estável', 'famoso', 'evidente']],
+    ['exímio', 'excelente', ['exato', 'mediano', 'extremo', 'excluído']],
+    ['ratificar', 'confirmar', ['corrigir', 'anular', 'rasurar', 'redigir'], 'Atenção: retificar (com e) é que significa corrigir.'],
+    ['perene', 'duradouro', ['breve', 'anual', 'perigoso', 'perdido']],
+    ['profícuo', 'proveitoso', ['prolixo', 'inútil', 'profundo', 'próximo']],
+    ['dirimir', 'resolver', ['diminuir', 'agravar', 'redigir', 'dividir'], 'Dirimir um conflito é resolvê-lo.'],
+    ['exíguo', 'escasso', ['abundante', 'exigente', 'extenso', 'exato']],
+    ['obsoleto', 'ultrapassado', ['moderno', 'obscuro', 'absoluto', 'completo']],
+    ['prolixo', 'palavroso', ['conciso', 'prolífico', 'preciso', 'ponderado'], 'Um texto prolixo usa palavras a mais.'],
+    ['lacónico', 'breve', ['extenso', 'lento', 'laboral', 'lânguido']],
+    ['sucinto', 'resumido', ['detalhado', 'sucessivo', 'súbito', 'sumptuoso']],
+    ['diligente', 'zeloso', ['negligente', 'inteligente', 'dirigente', 'lento']],
+    ['moroso', 'demorado', ['rápido', 'amoroso', 'moreno', 'mórbido']],
+    ['vetusto', 'antigo', ['novo', 'robusto', 'vasto', 'vestido']],
+    ['anuir', 'concordar', ['recusar', 'anular', 'aumentar', 'anunciar']],
+    ['prescindir', 'dispensar', ['precisar', 'prescrever', 'presidir', 'preceder'], 'Prescindir de algo é passar sem ele.'],
+    ['tácito', 'implícito', ['explícito', 'tático', 'tímido', 'total'], 'Um acordo tácito não é dito, mas subentende-se.'],
+    ['deferir', 'aprovar', ['diferir', 'adiar', 'recusar', 'arquivar'], 'Deferir um pedido é aprová-lo; diferir (com i) é adiar.'],
+    ['fulcral', 'essencial', ['secundário', 'fugaz', 'falso', 'final']],
+    ['incólume', 'ileso', ['ferido', 'inculto', 'incolor', 'inquieto']],
+    ['parco', 'escasso', ['abundante', 'parcial', 'pardo', 'lento']],
+    ['probo', 'honesto', ['corrupto', 'provável', 'prévio', 'pronto']],
+    ['pernicioso', 'prejudicial', ['benéfico', 'persistente', 'perspicaz', 'pequeno']],
+    ['perspicaz', 'sagaz', ['ingénuo', 'persistente', 'perplexo', 'preguiçoso']],
+    ['coibir', 'reprimir', ['incentivar', 'coabitar', 'cobrir', 'coincidir']],
+    ['idóneo', 'adequado', ['idoso', 'inadequado', 'idêntico', 'irónico']],
+    ['outorgar', 'conceder', ['recusar', 'adiar', 'ordenar', 'arrogar']],
+    ['ímpeto', 'impulso', ['calma', 'impasse', 'ímpar', 'impacto']],
+    ['zeloso', 'cuidadoso', ['descuidado', 'zangado', 'zombeteiro', 'vaidoso']]
+  ];
+  const ANTONYMS = [
+    ['escasso', 'abundante', ['raro', 'parco', 'exíguo', 'pequeno']],
+    ['efémero', 'duradouro', ['passageiro', 'breve', 'fugaz', 'momentâneo']],
+    ['prolixo', 'conciso', ['extenso', 'verboso', 'palavroso', 'longo']],
+    ['deferir', 'indeferir', ['aprovar', 'conceder', 'diferir', 'autorizar'], 'Deferir é aprovar; indeferir é recusar. Diferir (com i) é adiar.'],
+    ['explícito', 'implícito', ['claro', 'evidente', 'expresso', 'manifesto']],
+    ['ascensão', 'queda', ['subida', 'elevação', 'promoção', 'progresso']],
+    ['generoso', 'avarento', ['altruísta', 'bondoso', 'pródigo', 'magnânimo']],
+    ['dócil', 'rebelde', ['manso', 'obediente', 'meigo', 'submisso']],
+    ['otimista', 'pessimista', ['confiante', 'esperançoso', 'positivo', 'animado']],
+    ['transparente', 'opaco', ['límpido', 'translúcido', 'claro', 'cristalino']],
+    ['benéfico', 'prejudicial', ['útil', 'favorável', 'proveitoso', 'salutar']],
+    ['negligente', 'diligente', ['descuidado', 'desleixado', 'desatento', 'relapso']],
+    ['moroso', 'célere', ['lento', 'demorado', 'vagaroso', 'arrastado']],
+    ['ingénuo', 'astuto', ['inocente', 'crédulo', 'simples', 'cândido']],
+    ['obsoleto', 'atual', ['antiquado', 'ultrapassado', 'arcaico', 'caduco']],
+    ['passivo', 'ativo', ['inerte', 'parado', 'apático', 'submisso']],
+    ['heterogéneo', 'homogéneo', ['variado', 'diverso', 'misto', 'desigual']],
+    ['autorizar', 'proibir', ['permitir', 'consentir', 'aprovar', 'licenciar']],
+    ['acréscimo', 'redução', ['aumento', 'adição', 'subida', 'reforço']],
+    ['exonerar', 'nomear', ['demitir', 'destituir', 'dispensar', 'afastar'], 'Exonerar é afastar alguém de um cargo; nomear é designá-lo para o cargo.'],
+    ['louvar', 'censurar', ['elogiar', 'aplaudir', 'enaltecer', 'exaltar']],
+    ['concentrar', 'dispersar', ['reunir', 'juntar', 'agrupar', 'centralizar']],
+    ['temporário', 'permanente', ['provisório', 'transitório', 'interino', 'passageiro']],
+    ['rigoroso', 'impreciso', ['exato', 'preciso', 'minucioso', 'severo']],
+    ['facultativo', 'obrigatório', ['opcional', 'voluntário', 'livre', 'dispensável']],
+    ['admitir', 'excluir', ['aceitar', 'receber', 'acolher', 'incluir']],
+    ['antecipar', 'adiar', ['avançar', 'prever', 'adiantar', 'precipitar']],
+    ['consenso', 'desacordo', ['acordo', 'unanimidade', 'harmonia', 'concordância']],
+    ['escrupuloso', 'desleixado', ['meticuloso', 'cuidadoso', 'rigoroso', 'zeloso']]
+  ];
+
+  function synonyms(seed) {
+    const rng = makeRng(seed);
+    const pick = (bank, kind) => rng.shuffle(range(bank.length)).slice(0, N / 2).map((k) => ({ kind, k, e: bank[k] }));
+    const list = rng.shuffle(pick(SYNONYMS, 'sin').concat(pick(ANTONYMS, 'ant')));
+    const positions = balanced(range(5), N, rng);
+    return list.map(({ kind, k, e }, i) => {
+      const [word, ans, dis, note] = e;
+      const vals = rng.shuffle(dis);
+      vals.splice(positions[i], 0, ans);
+      return { kind, item: k, word, note: note || '', correct: ans, options: vals.map((v) => ({ value: v, label: v })) };
+    });
+  }
+
+  /* ================= Test 10: Compreensão de Textos ================= */
+  // Each statement: [text, 'V' | 'F' | 'N', why]
+  const TEXTS = [
+    { title: 'Horário dos Serviços Académicos', text: 'Os Serviços Académicos funcionam de segunda a sexta-feira, das 9h00 às 16h30, sem interrupção para almoço. Durante o mês de agosto, o atendimento presencial é suspenso e os pedidos são tratados apenas por correio eletrónico. As certidões são emitidas no prazo de cinco dias úteis após o pagamento do respetivo emolumento.',
+      items: [
+        ['Em agosto, é possível ser atendido presencialmente nos Serviços Académicos.', 'F', 'O texto diz que, em agosto, o atendimento presencial é suspenso.'],
+        ['Os Serviços Académicos fecham à hora de almoço.', 'F', 'O texto diz que funcionam sem interrupção para almoço.'],
+        ['Uma certidão paga numa segunda-feira (sem feriados nessa semana) fica pronta, o mais tardar, na segunda-feira seguinte.', 'V', 'Cinco dias úteis a contar de segunda-feira: terça, quarta, quinta, sexta e segunda.'],
+        ['A maioria dos pedidos de certidão é feita por estudantes de Enfermagem.', 'N', 'O texto não diz quem faz mais pedidos.']
+      ] },
+    { title: 'Formação de trabalhadores', text: 'Em 2025, a escola organizou 18 ações de formação para trabalhadores não docentes, mais seis do que no ano anterior. Metade das ações decorreu em formato online e as restantes foram presenciais. A satisfação média dos participantes foi de 87%, ligeiramente abaixo da registada em 2024.',
+      items: [
+        ['Em 2024, realizaram-se 12 ações de formação para trabalhadores não docentes.', 'V', '18 ações em 2025 são mais seis do que em 2024: 18 − 6 = 12.'],
+        ['Em 2025, houve nove ações de formação presenciais.', 'V', 'Metade de 18 foi online; as restantes 9 foram presenciais.'],
+        ['A satisfação dos participantes subiu de 2024 para 2025.', 'F', 'O texto diz que a satisfação de 2025 ficou ligeiramente abaixo da de 2024.'],
+        ['Todas as ações online tiveram uma satisfação acima de 87%.', 'N', 'O texto só dá a média de todas as ações, não a de cada formato.']
+      ] },
+    { title: 'Reembolso de deslocações', text: 'As despesas de deslocação em serviço só são reembolsadas quando a deslocação tiver sido autorizada previamente pelo dirigente. O pedido de reembolso deve ser apresentado no prazo de 30 dias após a deslocação, acompanhado dos comprovativos originais. Os pedidos apresentados fora de prazo não são aceites.',
+      items: [
+        ['Uma deslocação autorizada só depois de ter sido feita dá direito a reembolso.', 'F', 'A autorização tem de ser prévia, ou seja, antes da deslocação.'],
+        ['Um pedido de reembolso entregue 40 dias após a deslocação é aceite.', 'F', 'O prazo é de 30 dias e os pedidos fora de prazo não são aceites.'],
+        ['Basta entregar fotocópias dos comprovativos.', 'F', 'O texto exige os comprovativos originais.'],
+        ['O dirigente costuma autorizar todas as deslocações que lhe são pedidas.', 'N', 'O texto não diz com que frequência o dirigente autoriza.']
+      ] },
+    { title: 'Regras da biblioteca', text: 'A biblioteca tem 40 lugares de estudo. Os estudantes podem requisitar até três livros por um período de 15 dias, renovável uma vez, desde que nenhum outro utilizador tenha reservado a obra. Os docentes podem requisitar até dez livros.',
+      items: [
+        ['Um estudante pode chegar a ficar com um livro durante 30 dias.', 'V', '15 dias, mais uma renovação de 15 dias, se ninguém tiver reservado a obra.'],
+        ['Um docente pode requisitar mais livros do que um estudante.', 'V', 'Os docentes podem requisitar até dez livros; os estudantes até três.'],
+        ['A biblioteca está quase sempre cheia.', 'N', 'O texto diz quantos lugares há, mas não quantos estão ocupados.'],
+        ['Um estudante pode renovar um livro que outro utilizador reservou.', 'F', 'A renovação só é possível se ninguém tiver reservado a obra.']
+      ] },
+    { title: 'Ensino clínico', text: 'Antes de iniciarem o ensino clínico, todos os estudantes de Enfermagem têm de apresentar o boletim de vacinas atualizado e frequentar uma sessão sobre controlo de infeção. Os estudantes que não cumpram estes requisitos não podem iniciar o estágio na data prevista.',
+      items: [
+        ['Um estudante de Enfermagem que faltou à sessão sobre controlo de infeção pode iniciar o estágio na data prevista.', 'F', 'Quem não cumpre os requisitos não pode iniciar o estágio na data prevista.'],
+        ['A sessão sobre controlo de infeção é obrigatória para os estudantes de Enfermagem.', 'V', 'O texto diz que todos têm de a frequentar antes do ensino clínico.'],
+        ['Os estudantes de Fisioterapia também têm de apresentar o boletim de vacinas.', 'N', 'O texto só fala dos estudantes de Enfermagem.']
+      ] },
+    { title: 'Orçamento de material de escritório', text: 'O orçamento da escola para material de escritório foi de 12 000 euros em 2025. Até ao fim de junho, tinham sido gastos 7 200 euros. A direção decidiu que, no segundo semestre, todas as compras acima de 500 euros precisam de três orçamentos de fornecedores diferentes.',
+      items: [
+        ['Até ao fim de junho, foi gasto mais de metade do orçamento para material de escritório.', 'V', '7 200 é mais do que metade de 12 000 (6 000).'],
+        ['No início do segundo semestre, restavam 4 800 euros para material de escritório.', 'V', '12 000 − 7 200 = 4 800.'],
+        ['Uma compra de 800 euros em outubro precisa de três orçamentos.', 'V', 'Outubro é no segundo semestre e 800 euros é mais do que 500.'],
+        ['Em 2026, o orçamento para material de escritório vai ser maior.', 'N', 'O texto não fala do orçamento de 2026.']
+      ] },
+    { title: 'Teletrabalho', text: 'Os trabalhadores podem pedir o regime de teletrabalho até dois dias por semana, desde que as funções sejam compatíveis e o pedido seja aprovado pelo superior hierárquico. Nos dias de teletrabalho, o trabalhador tem de estar contactável durante todo o horário de trabalho.',
+      items: [
+        ['Um trabalhador pode ficar em teletrabalho três dias por semana.', 'F', 'O máximo é de dois dias por semana.'],
+        ['Nos dias de teletrabalho, o trabalhador não precisa de estar contactável.', 'F', 'Tem de estar contactável durante todo o horário de trabalho.'],
+        ['Basta o trabalhador pedir para passar a ter teletrabalho.', 'F', 'O pedido tem de ser aprovado pelo superior e as funções têm de ser compatíveis.'],
+        ['A maioria dos trabalhadores prefere o teletrabalho.', 'N', 'O texto não diz o que os trabalhadores preferem.']
+      ] },
+    { title: 'Inquérito aos estudantes', text: 'Num inquérito a 400 estudantes, 300 disseram estar satisfeitos com o atendimento dos serviços. Entre os insatisfeitos, a queixa mais referida foi o tempo de espera. Responderam ao inquérito estudantes de todos os cursos da escola.',
+      items: [
+        ['Um quarto dos estudantes inquiridos não disse estar satisfeito.', 'V', '400 − 300 = 100, e 100 é um quarto de 400.'],
+        ['Entre os insatisfeitos, o tempo de espera foi a queixa mais referida.', 'V', 'É o que o texto diz.'],
+        ['Todos os estudantes da escola responderam ao inquérito.', 'N', 'Responderam estudantes de todos os cursos, mas o texto não diz quantos estudantes tem a escola.']
+      ] },
+    { title: 'Reclamação da classificação', text: 'Os candidatos podem reclamar da classificação no prazo de dez dias úteis a contar da data de publicação da lista. A reclamação é apresentada por escrito e dirigida ao presidente do júri, que decide no prazo de cinco dias úteis.',
+      items: [
+        ['A reclamação pode ser apresentada oralmente.', 'F', 'Tem de ser apresentada por escrito.'],
+        ['A reclamação é dirigida ao presidente do júri.', 'V', 'É o que o texto diz.'],
+        ['Quem reclama vê a sua classificação subir.', 'N', 'O texto não diz qual é o resultado das reclamações.']
+      ] },
+    { title: 'Arquivo de processos', text: 'Os processos dos estudantes são conservados em arquivo durante dez anos após a conclusão do curso. Depois desse prazo, são digitalizados e os originais em papel são eliminados, com exceção dos diplomas, que são conservados para sempre.',
+      items: [
+        ['Os diplomas originais são eliminados ao fim de dez anos.', 'F', 'Os diplomas são a exceção: são conservados para sempre.'],
+        ['Cinco anos após a conclusão do curso, o processo de um estudante ainda está em arquivo.', 'V', 'Os processos ficam em arquivo durante dez anos.'],
+        ['A digitalização dos processos é feita por uma empresa externa.', 'N', 'O texto não diz quem faz a digitalização.']
+      ] },
+    { title: 'Reuniões do conselho', text: 'O conselho pedagógico reúne ordinariamente uma vez por mês e, extraordinariamente, sempre que o presidente o convoque. As deliberações só são válidas se estiver presente a maioria dos membros.',
+      items: [
+        ['Num conselho de 20 membros, com 8 presentes, as deliberações são válidas.', 'F', '8 não é a maioria de 20 (seriam precisos pelo menos 11).'],
+        ['O conselho pedagógico pode reunir mais de uma vez no mesmo mês.', 'V', 'Além da reunião mensal, pode haver reuniões extraordinárias.'],
+        ['O presidente convoca reuniões extraordinárias todos os meses.', 'N', 'O texto diz que pode convocar, mas não com que frequência o faz.']
+      ] },
+    { title: 'Cantina', text: 'A cantina serve refeições entre as 12h00 e as 14h30. A refeição social custa 3,25 euros para estudantes e 4,80 euros para trabalhadores. Quem chegar depois das 14h00 só tem garantida a refeição vegetariana.',
+      items: [
+        ['Um trabalhador paga mais do que um estudante pela refeição.', 'V', '4,80 euros é mais do que 3,25 euros.'],
+        ['Às 14h15, a refeição de carne está garantida.', 'F', 'Depois das 14h00, só a refeição vegetariana está garantida.'],
+        ['A refeição vegetariana é a mais escolhida.', 'N', 'O texto não diz qual é a refeição mais escolhida.']
+      ] }
+  ];
+  const TF_LABEL = { V: 'Verdadeiro', F: 'Falso', N: 'Não se pode dizer' };
+
+  function texts(seed) {
+    const rng = makeRng(seed);
+    const options = ['V', 'F', 'N'].map((v) => ({ value: v, label: TF_LABEL[v] }));
+    const out = [];
+    rng.shuffle(range(TEXTS.length)).forEach((t) => {
+      rng.shuffle(range(TEXTS[t].items.length)).forEach((s) => {
+        if (out.length >= N) return;
+        const [statement, ans, why] = TEXTS[t].items[s];
+        out.push({ textId: t, item: s, title: TEXTS[t].title, text: TEXTS[t].text, statement, why, correct: ans, options });
+      });
+    });
+    return out;
+  }
+
+  /* ================= Test 11: Raciocínio Numérico (tabelas) ================= */
+  const COURSES = ['Enfermagem', 'Fisioterapia', 'Análises Clínicas', 'Cardiopneumologia', 'Radiologia', 'Dietética e Nutrição'];
+  const YEARS = [2023, 2024, 2025];
+  const NUM_CONTEXTS = [
+    { title: 'Candidaturas recebidas por curso', unit: 'candidaturas' },
+    { title: 'Pedidos de certidão por curso', unit: 'pedidos de certidão' },
+    { title: 'Estudantes inscritos em ensino clínico, por curso', unit: 'estudantes inscritos' }
+  ];
+  const SUPPLIES = [
+    ['Resmas de papel A4', 450], ['Tinteiros', 1890], ['Pastas de arquivo', 120], ['Caixas de envelopes', 875],
+    ['Caixas de canetas', 640], ['Agrafadores', 730], ['Blocos de notas', 85], ['Caixas de agrafos', 160]
+  ];
+  const NUM_KINDS = ['total', 'diff', 'pctchg', 'share', 'avg', 'cost'];
+
+  const fmtInt = (n) => (n < 0 ? '−' : '') + String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  const fmtEur = (c) => fmtInt(Math.floor(c / 100)) + ',' + String(c % 100).padStart(2, '0') + ' €';
+  const fmtVar = (p) => (p > 0 ? '+' : p < 0 ? '−' : '') + Math.abs(p) + '%';
+  const fmtPct = (p) => p + '%';
+  const sum = (a) => a.reduce((x, y) => x + y, 0);
+
+  function numDistractors(ans, cands, fill, valid, rng) {
+    const out = [];
+    const push = (v) => { if (Number.isInteger(v) && v !== ans && valid(v) && !out.includes(v)) out.push(v); };
+    rng.shuffle(cands).slice(0, 3).forEach(push);
+    rng.shuffle(fill).forEach(push);
+    return out.slice(0, 4);
+  }
+
+  /** Recomputes the answer of a numeric question from its raw data (used by the validator too). */
+  function numAnswer(q) {
+    const d = q.raw.data;
+    switch (q.kind) {
+      case 'total': return sum(d.map((row) => row[q.raw.y]));
+      case 'diff': return Math.abs(d[q.raw.r1][q.raw.y] - d[q.raw.r2][q.raw.y]);
+      case 'pctchg': { const a = d[q.raw.r][q.raw.y1], b = d[q.raw.r][q.raw.y2]; return (b - a) * 100 / a; }
+      case 'share': return d[q.raw.r][q.raw.y] * 100 / sum(d.map((row) => row[q.raw.y]));
+      case 'avg': return sum(d[q.raw.r]) / d[q.raw.r].length;
+      case 'cost': return sum(q.raw.items.map(([, p, n]) => p * n));
+    }
+    return NaN;
+  }
+
+  function numericQuestion(kind, rng) {
+    if (kind === 'cost') {
+      const items = rng.shuffle(SUPPLIES).slice(0, 3).map(([name, p]) => [name, p, rng.int(2, 12)]);
+      const ans = numAnswer({ kind, raw: { items } });
+      const costs = items.map(([, p, n]) => p * n);
+      const cands = costs.map((c) => ans - c).concat(items.map(([, p]) => ans + p), items.map(([, p]) => ans - p));
+      const fill = [100, -100, 200, -200, 500, -500, 1000, -1000, 50, -50].map((k) => ans + k);
+      const dis = numDistractors(ans, cands, fill, (v) => v > 0, rng);
+      return {
+        kind, raw: { items }, correct: ans, values: dis, fmt: fmtEur,
+        table: { title: 'Encomenda de material de escritório', head: ['Artigo', 'Preço unitário', 'Quantidade'], rows: items.map(([nm, p, n]) => [nm, fmtEur(p), String(n)]) },
+        question: 'Qual é o custo total desta encomenda?',
+        steps: items.map(([nm, p, n]) => `${nm}: ${n} × ${fmtEur(p)} = ${fmtEur(p * n)}`).concat([`Total: ${costs.map(fmtEur).join(' + ')} = ${fmtEur(ans)}`])
+      };
+    }
+    const ctx = rng.pick(NUM_CONTEXTS);
+    const rows = rng.shuffle(COURSES).slice(0, 4);
+    const data = rows.map(() => YEARS.map(() => rng.int(4, 40) * 5));
+    const base = { kind, ctx, rows };
+    const table = () => ({ title: ctx.title, head: ['Curso'].concat(YEARS.map(String)), rows: rows.map((r, k) => [r].concat(data[k].map(fmtInt))) });
+    const colSum = (y) => sum(data.map((row) => row[y]));
+    if (kind === 'total') {
+      const y = rng.int(0, 2);
+      const raw = { data, y }, ans = numAnswer({ kind, raw });
+      const cands = [0, 1, 2].filter((k) => k !== y).map(colSum).concat(data.map((row) => ans - row[y]));
+      const dis = numDistractors(ans, cands, [5, -5, 10, -10, 15, -15, 20, -20, 50, -50].map((k) => ans + k), (v) => v > 0, rng);
+      return Object.assign(base, { raw, correct: ans, values: dis, fmt: fmtInt, table: table(),
+        question: `Qual foi o total de ${ctx.unit} em ${YEARS[y]}?`,
+        steps: [`${data.map((row) => fmtInt(row[y])).join(' + ')} = ${fmtInt(ans)}`] });
+    }
+    if (kind === 'diff') {
+      const y = rng.int(0, 2);
+      let r1, r2;
+      do { [r1, r2] = rng.shuffle(range(4)).slice(0, 2); } while (data[r1][y] === data[r2][y]);
+      const raw = { data, y, r1, r2 }, ans = numAnswer({ kind, raw });
+      const cands = [0, 1, 2].filter((k) => k !== y).map((k) => Math.abs(data[r1][k] - data[r2][k])).concat([data[r1][y] + data[r2][y]]);
+      const dis = numDistractors(ans, cands, [5, -5, 10, -10, 15, -15, 20, -20].map((k) => ans + k), (v) => v > 0, rng);
+      return Object.assign(base, { raw, correct: ans, values: dis, fmt: fmtInt, table: table(),
+        question: `Em ${YEARS[y]}, qual foi a diferença entre o número de ${ctx.unit} de ${rows[r1]} e de ${rows[r2]}?`,
+        steps: [`${rows[r1]}: ${fmtInt(data[r1][y])}; ${rows[r2]}: ${fmtInt(data[r2][y])}.`, `Diferença: ${fmtInt(Math.max(data[r1][y], data[r2][y]))} − ${fmtInt(Math.min(data[r1][y], data[r2][y]))} = ${fmtInt(ans)}`] });
+    }
+    if (kind === 'pctchg') {
+      const r = rng.int(0, 3);
+      const [y1, y2] = rng.pick([[0, 1], [1, 2], [0, 2]]);
+      const v1 = 20 * rng.int(3, 10), p = rng.pick([-25, -20, -10, 10, 20, 25, 40, 50]);
+      data[r][y1] = v1; data[r][y2] = v1 + v1 * p / 100;
+      const raw = { data, r, y1, y2 }, ans = numAnswer({ kind, raw });
+      const v2 = data[r][y2];
+      const cands = [-ans, Math.round((v2 - v1) * 100 / v2), v2 - v1];
+      const dis = numDistractors(ans, cands, [5, -5, 10, -10, 15, -15, 20, -20].map((k) => ans + k), (v) => v !== 0 && v > -100, rng);
+      return Object.assign(base, { raw, correct: ans, values: dis, fmt: fmtVar, table: table(),
+        question: `Qual foi a variação percentual do número de ${ctx.unit} de ${rows[r]} entre ${YEARS[y1]} e ${YEARS[y2]}?`,
+        steps: [`Variação: ${fmtInt(v2)} − ${fmtInt(v1)} = ${fmtInt(v2 - v1)}.`, `Em percentagem do valor inicial: ${fmtInt(v2 - v1)} ÷ ${fmtInt(v1)} × 100 = ${fmtVar(ans)}`] });
+    }
+    if (kind === 'share') {
+      const y = rng.int(0, 2), r = rng.int(0, 3);
+      const T = rng.pick([200, 300, 400, 500, 600]), s = rng.pick([10, 15, 20, 25, 30, 35, 40]);
+      const v = T * s / 100, rest = (T - v) / 5;
+      const a = rng.int(2, rest - 4), b = rng.int(2, rest - a - 2), c = rest - a - b;
+      const others = rng.shuffle([a * 5, b * 5, c * 5]);
+      let o = 0;
+      data.forEach((row, k) => { row[y] = k === r ? v : others[o++]; });
+      const raw = { data, y, r }, ans = numAnswer({ kind, raw });
+      const cands = data.filter((_, k) => k !== r).map((row) => Math.round(row[y] * 100 / T));
+      const dis = numDistractors(ans, cands, [5, -5, 10, -10, 15, -15].map((k) => ans + k), (x) => x > 0 && x < 100, rng);
+      return Object.assign(base, { raw, correct: ans, values: dis, fmt: fmtPct, table: table(),
+        question: `Em ${YEARS[y]}, que percentagem do total de ${ctx.unit} corresponde a ${rows[r]}?`,
+        steps: [`Total de ${YEARS[y]}: ${data.map((row) => fmtInt(row[y])).join(' + ')} = ${fmtInt(T)}.`, `${rows[r]}: ${fmtInt(v)} ÷ ${fmtInt(T)} × 100 = ${ans}%`] });
+    }
+    // avg
+    const r = rng.int(0, 3);
+    let vals;
+    do {
+      const m = 5 * rng.int(8, 40), d1 = 5 * rng.int(1, 6), d2 = 5 * rng.int(1, 6);
+      vals = rng.shuffle([m + d1, m + d2, m - d1 - d2]);
+    } while (Math.min(...vals) < 10);
+    data[r] = vals;
+    const raw = { data, r }, ans = numAnswer({ kind, raw });
+    const sorted = vals.slice().sort((x, y) => x - y);
+    const cands = [sorted[1], Math.round(sum(vals) / 2), Math.round((vals[0] + vals[2]) / 2)];
+    const dis = numDistractors(ans, cands, [5, -5, 10, -10, 15, -15].map((k) => ans + k), (v) => v > 0, rng);
+    return Object.assign(base, { raw, correct: ans, values: dis, fmt: fmtInt, table: table(),
+      question: `Qual foi a média anual de ${ctx.unit} de ${rows[r]} entre ${YEARS[0]} e ${YEARS[2]}?`,
+      steps: [`Soma: ${vals.map(fmtInt).join(' + ')} = ${fmtInt(sum(vals))}.`, `Média: ${fmtInt(sum(vals))} ÷ 3 = ${fmtInt(ans)}`] });
+  }
+
+  function numeric(seed) {
+    const rng = makeRng(seed);
+    const kinds = balanced(NUM_KINDS, N, rng);
+    const positions = balanced(range(5), N, rng);
+    return kinds.map((kind, i) => {
+      for (let attempt = 0; attempt < 200; attempt++) {
+        const q = numericQuestion(kind, rng);
+        if (q.values.length < 4) continue;
+        const vals = q.values.slice();
+        vals.splice(positions[i], 0, q.correct);
+        q.options = vals.map((v) => ({ value: v, label: q.fmt(v) }));
+        delete q.values; delete q.fmt;
+        return q;
+      }
+      throw new Error('Não foi possível gerar a pergunta numérica ' + (i + 1));
+    });
+  }
+
+  /* ================= Test 12: Atenção (tipo d2) ================= */
+  const ATT_LEN = 14;
+  function attItem(letter, marks, rng) {
+    const ups = range(3).filter((u) => marks - u >= 0 && marks - u <= 2);
+    const up = rng.pick(ups);
+    return { l: letter, up, down: marks - up };
+  }
+  const isTarget = (it) => it.l === 'd' && it.up + it.down === 2;
+
+  function attention(seed) {
+    const rng = makeRng(seed);
+    const counts = balanced(range(6), N, rng);
+    return counts.map((k) => {
+      const at = new Set(rng.shuffle(range(ATT_LEN)).slice(0, k));
+      const items = range(ATT_LEN).map((j) => {
+        if (at.has(j)) return attItem('d', 2, rng);
+        const r = rng.next();
+        if (r < 0.35) return attItem('p', 2, rng);          // p with 2 marks: the main trap
+        if (r < 0.55) return attItem('d', 1, rng);
+        if (r < 0.75) return attItem('d', 3, rng);
+        if (r < 0.80) return attItem('d', 4, rng);
+        return attItem('p', rng.pick([1, 3, 4]), rng);
+      });
+      return { items, targets: items.map((it, j) => (isTarget(it) ? j : -1)).filter((j) => j >= 0), correct: k, options: numOptions(5) };
+    });
+  }
+
   const generators = {
     numerica: numberSpeed, percetiva: perceptual, espacial: spatial, series,
-    codigos: codes, silogismos: syllogisms, matrizes: figures
+    codigos: codes, silogismos: syllogisms, matrizes: figures,
+    analogias: analogies, sinonimos: synonyms, textos: texts, numerico: numeric, atencao: attention
   };
 
   const Gen = {
     N, mulberry32, makeRng, balanced, maxRun, DEFAULT_SEEDS, generators,
     numberSpeed, perceptual, spatial, series, codes, syllogisms, figures,
+    analogies, synonyms, texts, numeric, attention, numAnswer, isTarget, ANALOGIES, SYNONYMS, ANTONYMS, TEXTS, TF_LABEL, NUM_KINDS, ATT_LEN,
     LETTERS, CONFUSABLE, CODE_CHARS, SIMILAR, SERIES_BUILD, seriesCandidates, diffPositions,
     SYL_TEMPLATES, SYL_ANSWER_LABEL, SHAPES, FILLS, figureAt, figKey, figDiffCount, describeFigure, ruleText,
     isCorrect: (q, optionIndex) => !!q.options[optionIndex] && q.options[optionIndex].value === q.correct,

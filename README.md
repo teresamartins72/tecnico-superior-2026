@@ -1,6 +1,6 @@
 # Treino de Avaliação Psicológica
 
-A small static site for practising short aptitude tests: 7 tests × 30 questions (210 in total). It needs no backend, no login, no build step and no npm packages. All user-facing text is in European Portuguese.
+A small static site for practising short aptitude tests: 12 tests × 30 questions (360 per set). It needs no backend, no login, no build step and no npm packages. All user-facing text is in European Portuguese.
 
 | Tab | What it trains |
 | --- | --- |
@@ -11,6 +11,11 @@ A small static site for practising short aptitude tests: 7 tests × 30 questions
 | Verificação de Códigos | Count the positions where two codes differ |
 | Silogismos | Verdadeira / Falsa / Não se pode concluir |
 | Matrizes de Figuras | Pick the figure that continues a sequence |
+| Analogias | A está para B como C está para ? (41-item bank) |
+| Sinónimos e Antónimos | Pick the synonym or antonym; distractors include look-alike words (59-item bank) |
+| Compreensão de Textos | Short administrative texts: Verdadeiro / Falso / Não se pode dizer (12 texts, 42 statements) |
+| Raciocínio Numérico | Tables: totals, differences, percentage change, share of total, averages, order costs |
+| Atenção | d2-style: count the letters d with exactly two marks |
 
 ## Open it locally
 
@@ -40,7 +45,7 @@ Double-click `index.html`. It works straight from the file system (`file://`), o
 Edit the `TESTS` array near the middle of `app.js`:
 
 ```js
-const TESTS = [numerica, percetiva, espacial, seriesMod, codigos, silogismos, matrizes];
+const TESTS = [numerica, percetiva, espacial, seriesMod, codigos, silogismos, matrizes, analogias, sinonimos, textos, numerico, atencao];
 ```
 
 If you remove an entry, its tab disappears. If you change the order, the tabs are reordered.
@@ -51,7 +56,7 @@ If you remove an entry, its tab disappears. If you change the order, the tabs ar
 node scripts/validate.js
 ```
 
-The script generates the default sets, plus 40 random seeds per test (pass a number to change this, e.g. `node scripts/validate.js 200`). It asserts every rule: exactly 30 questions; the same seed always gives the same set; balanced answers; distinct options; the correct option spread over positions; series with a unique hidden term (checked by brute force against the whole rule catalogue); code differences equal to the real count; syllogism answers confirmed by an independent Venn-model check plus Portuguese agreement; figure options that differ from the answer in exactly one attribute. It exits with code 1 if anything fails.
+The script generates the default sets, plus 40 random seeds per test (pass a number to change this, e.g. `node scripts/validate.js 200`). It asserts every rule: exactly 30 questions; the same seed always gives the same set; balanced answers; distinct options; the correct option spread over positions; series with a unique hidden term (checked by brute force against the whole rule catalogue); code differences equal to the real count; syllogism answers confirmed by an independent Venn-model check plus Portuguese agreement; figure options that differ from the answer in exactly one attribute; verbal items match their bank with no repeats in a set; numeric answers recomputed from the table data; attention counts recomputed from the symbols. It exits with code 1 if anything fails.
 
 ## How it behaves
 
@@ -61,7 +66,7 @@ The script generates the default sets, plus 40 random seeds per test (pass a num
 - **Statistics:** the footer shows the score `X / Y` (correct / answered), progress, accuracy and, from 10 answers on, the target-accuracy message. **Estatísticas** expands Precisão, Respondidas, Certas, Erradas, Saltadas and Tempo médio por resposta.
 - **Average time per answer:** each answer is timed from the **previous answer or skip in the same tab**, or from when the tab was opened if there was none. Time while the browser tab is hidden doesn't count, and a single answer counts for at most 2 minutes, so a break doesn't distort the average.
 - **Target accuracy:** default 90%, adjustable from 50 to 100%. This is only your own training target. The site shows no official pass mark and no Apto / Não Apto label.
-- **Hints at the end:** these compare accuracy with your target, and the average time with a per-test reference pace (8 s for number/perceptual speed, 10 s for spatial and codes, 20 s for series, syllogisms and figures). The reference paces are arbitrary training values, not exam timings.
+- **Hints at the end:** these compare accuracy with your target, and the average time with a per-test reference pace (8 s for number/perceptual speed, 10 s for spatial, codes and synonyms, 15 s for analogies and attention, 20 s for series, syllogisms and figures, 30 s for texts, 45 s for numeric tables). The reference paces are arbitrary training values, not exam timings.
 - **History:** the last 10 finished attempts per test (date, accuracy, average time, correct/answered) are kept.
 - **Timer (optional):** "Modo cronometrado" with a minutes field (default 5). The countdown runs only while that test's tab is open. When it reaches zero, the remaining questions lock and the result appears.
 - **Sets:** each test's 30 questions come from a seeded generator (mulberry32) with a fixed default seed, so you see the same questions on every visit. **Novo conjunto** picks a new random seed for the current tab only and resets its answers. **Voltar ao conjunto original** restores the default seed.
@@ -73,3 +78,5 @@ The script generates the default sets, plus 40 random seeds per test (pass a num
 - **Matrizes de Figuras:** a 5-figure sequence where the number of items goes up or down by 1 needs 5 different counts, so counts range from 1 to 6 instead of 1 to 4.
 - **Verificação de Códigos:** I, L, O, 0 and 1 are never used. A swap of two adjacent characters counts as 2 differences, and the explanation says so.
 - **Séries Numéricas:** a series is kept only if exactly one value for the hidden term fits any rule in the catalogue, so the distractors can never be a valid alternative answer.
+- **Verbal tests:** the word and text banks live in `generators.js` (`ANALOGIES`, `SYNONYMS`, `ANTONYMS`, `TEXTS`). Each set draws 30 items without repetition; add items to the banks to get more variety from **Novo conjunto**. In Compreensão de Textos, statements about the same text stay together.
+- **Raciocínio Numérico:** tables are generated, and values are built so every answer is a whole number (percentages included), so no calculator is needed.
