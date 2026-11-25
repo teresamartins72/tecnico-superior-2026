@@ -156,8 +156,86 @@
     }
   };
 
+  /* ---------- Verbal, numeric and attention tests ---------- */
+
+  const analogias = {
+    id: 'analogias', name: 'Analogias', paceRef: 15,
+    generate: G.analogies,
+    instructions: `<p>Descubra a relação entre as duas primeiras palavras e escolha a palavra que tem a mesma relação com a terceira.</p>
+      <p><strong>Exemplo:</strong> <em>Dia</em> está para <em>noite</em> como <em>branco</em> está para … <strong>preto</strong> (são palavras de sentido contrário).</p>`,
+    body: (q) => `<p class="analogy"><b>${esc(cap(q.a))}</b> está para <b>${esc(q.b)}</b> como <b>${esc(q.c)}</b> está para <span class="term-q">?</span></p>`,
+    optsClass: 'opts-words',
+    optAria: (o) => o.label,
+    explain: (q) => `<p>Relação: ${esc(q.rel)}.</p><p><b>${esc(cap(q.a))}</b> → <b>${esc(q.b)}</b>, tal como <b>${esc(q.c)}</b> → <b>${esc(q.correct)}</b>.</p>`
+  };
+
+  const sinonimos = {
+    id: 'sinonimos', name: 'Sinónimos e Antónimos', paceRef: 10,
+    generate: G.synonyms,
+    instructions: '<p>Leia com atenção se a pergunta pede um <strong>sinónimo</strong> (palavra com o mesmo significado) ou um <strong>antónimo</strong> (palavra com o significado contrário). Algumas opções são parecidas na forma, mas não no significado.</p>',
+    body: (q) => `<p class="word-q">Qual é o <strong class="${q.kind === 'sin' ? 'k-sin' : 'k-ant'}">${q.kind === 'sin' ? 'sinónimo' : 'antónimo'}</strong> de <b class="word">${esc(q.word)}</b>?</p>`,
+    optsClass: 'opts-words',
+    optAria: (o) => o.label,
+    explain: (q) => `<p>${q.kind === 'sin'
+      ? `<b>${esc(cap(q.word))}</b> significa o mesmo que <b>${esc(q.correct)}</b>.`
+      : `O contrário de <b>${esc(q.word)}</b> é <b>${esc(q.correct)}</b>.`}</p>${q.note ? `<p class="muted">${esc(q.note)}</p>` : ''}`
+  };
+
+  const textos = {
+    id: 'textos', name: 'Compreensão de Textos', paceRef: 30,
+    generate: G.texts,
+    instructions: `<p>Leia o texto e diga se a afirmação é <strong>Verdadeira</strong>, <strong>Falsa</strong> ou se <strong>Não se pode dizer</strong>. Use só a informação do texto, mesmo que saiba outras coisas sobre o assunto.</p>
+      <p><strong>Verdadeiro:</strong> o texto diz ou permite concluir isso. <strong>Falso:</strong> o texto diz o contrário. <strong>Não se pode dizer:</strong> o texto não dá informação suficiente.</p>`,
+    body: (q) => `<div class="passage"><p class="passage-t">${esc(q.title)}</p><p>${esc(q.text)}</p></div>
+      <p class="concl"><strong>Afirmação:</strong> ${esc(q.statement)}</p>`,
+    optsClass: 'opts-text',
+    optAria: (o) => o.label,
+    explain: (q) => `<p>${esc(q.why)}</p><p class="muted">Resposta: ${esc(G.TF_LABEL[q.correct])}.</p>`
+  };
+
+  const dataTable = (t) => `<div class="table-wrap dt-wrap"><table class="dt"><caption>${esc(t.title)}</caption>
+    <thead><tr>${t.head.map((h) => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead>
+    <tbody>${t.rows.map((r) => `<tr>${r.map((c, j) => (j === 0 ? `<th scope="row">${esc(c)}</th>` : `<td>${esc(c)}</td>`)).join('')}</tr>`).join('')}</tbody></table></div>`;
+
+  const numerico = {
+    id: 'numerico', name: 'Raciocínio Numérico', paceRef: 45,
+    generate: G.numeric,
+    instructions: `<p>Use os dados da tabela para responder. Pode usar papel e caneta, mas não calculadora.</p>
+      <p><strong>Lembre-se:</strong> variação percentual = (valor final − valor inicial) ÷ valor inicial × 100.</p>`,
+    body: (q) => `${dataTable(q.table)}<p class="concl">${esc(q.question)}</p>`,
+    optsClass: 'opts-wide',
+    optAria: (o) => 'Opção ' + o.label,
+    explain: (q) => q.steps.map((s) => `<p class="mono">${esc(s)}</p>`).join('')
+  };
+
+  const D2_X = { 1: [15], 2: [10, 20] };
+  function d2Svg(it, label) {
+    const marks = (n, y1, y2) => (D2_X[n] || []).map((x) => `<line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}"/>`).join('');
+    return `<svg class="d2" viewBox="0 0 30 64" role="img" aria-label="${esc(label)}">${marks(it.up, 3, 12)}<text x="15" y="33" text-anchor="middle" dominant-baseline="central">${it.l}</text>${marks(it.down, 52, 61)}</svg>`;
+  }
+  const d2Label = (it, j) => {
+    const t = (n) => (n === 1 ? '1 traço' : n + ' traços');
+    return `Símbolo ${j + 1}: ${it.l}, ${t(it.up)} em cima e ${t(it.down)} em baixo`;
+  };
+
+  const atencao = {
+    id: 'atencao', name: 'Atenção', paceRef: 15,
+    generate: G.attention,
+    instructions: `<p>Conte quantas letras <strong>d</strong> têm <strong>exatamente 2 traços</strong> no total (2 em cima, 2 em baixo, ou 1 em cima e 1 em baixo). Não conte as letras <strong>p</strong>, nem os <strong>d</strong> com 1, 3 ou 4 traços.</p>`,
+    body: (q) => `<div class="d2-row">${q.items.map((it, j) => d2Svg(it, d2Label(it, j))).join('')}</div>`,
+    optsClass: 'opts-count',
+    optAria: (o) => o.label + (o.value === 1 ? ' letra' : ' letras'),
+    explain: (q) => {
+      const row = q.items.map((it, j) => `<span class="d2-cell${G.isTarget(it) ? ' d2-hit' : ''}">${d2Svg(it, d2Label(it, j))}</span>`).join('');
+      const traps = q.items.map((it, j) => (it.l === 'p' && it.up + it.down === 2 ? j + 1 : 0)).filter(Boolean);
+      return `<div class="d2-row d2-x">${row}</div>
+        <p>${q.targets.length ? `Contam as posições ${q.targets.map((j) => j + 1).join(', ')} (total ${q.targets.length}).` : 'Nenhuma letra d tem exatamente 2 traços (total 0).'}</p>
+        ${traps.length ? `<p class="muted">Armadilhas: nas posições ${traps.join(', ')} há um p com 2 traços, que não conta.</p>` : ''}`;
+    }
+  };
+
   /* Edit this array to hide or reorder tests. */
-  const TESTS = [numerica, percetiva, espacial, seriesMod, codigos, silogismos, matrizes];
+  const TESTS = [numerica, percetiva, espacial, seriesMod, codigos, silogismos, matrizes, analogias, sinonimos, textos, numerico, atencao];
 
   /* ======================= State & storage ======================= */
 

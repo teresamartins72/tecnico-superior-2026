@@ -176,6 +176,87 @@ const CHECKS = {
     ok(lv.easy === 20 && lv.hard === 10, `matrizes: níveis ${JSON.stringify(lv)}`);
     const pos = hist(qs.map((q) => G.correctIndex(q)));
     for (let p = 0; p < 5; p++) ok(pos[p] >= 5 && pos[p] <= 7, `matrizes: posição ${p + 1} certa ${pos[p] || 0} vezes`);
+  },
+
+  analogias(qs) {
+    ok(new Set(qs.map((q) => q.item)).size === G.N, 'analogias: itens repetidos no mesmo conjunto');
+    qs.forEach((q, i) => {
+      const t = `analogias Q${i + 1}`;
+      const e = G.ANALOGIES[q.item];
+      ok(q.correct === e[3], `${t}: resposta não corresponde ao banco`);
+      ok(q.options.length === 5, `${t}: ${q.options.length} opções`);
+      ok(![q.a, q.b, q.c].includes(q.correct), `${t}: a resposta repete uma palavra do enunciado`);
+      ok(typeof q.rel === 'string' && q.rel.length > 5, `${t}: relação em falta`);
+    });
+    const pos = hist(qs.map((q) => G.correctIndex(q)));
+    for (let p = 0; p < 5; p++) ok(pos[p] >= 5 && pos[p] <= 7, `analogias: posição ${p + 1} certa ${pos[p] || 0} vezes`);
+  },
+
+  sinonimos(qs) {
+    const kinds = hist(qs.map((q) => q.kind));
+    ok(kinds.sin === 15 && kinds.ant === 15, `sinonimos: ${JSON.stringify(kinds)}`);
+    ok(new Set(qs.map((q) => q.kind + q.item)).size === G.N, 'sinonimos: itens repetidos');
+    qs.forEach((q, i) => {
+      const t = `sinonimos Q${i + 1}`;
+      const e = (q.kind === 'sin' ? G.SYNONYMS : G.ANTONYMS)[q.item];
+      ok(q.word === e[0] && q.correct === e[1], `${t}: não corresponde ao banco`);
+      ok(q.options.length === 5 && !q.options.some((o) => o.value === q.word), `${t}: opções inválidas`);
+    });
+    [G.SYNONYMS, G.ANTONYMS].forEach((bank, b) => bank.forEach((e, k) => {
+      ok(e[2].length === 4 && distinct(e[2].concat([e[1]])), `banco ${b ? 'antónimos' : 'sinónimos'} ${k}: distratores inválidos`);
+    }));
+    const pos = hist(qs.map((q) => G.correctIndex(q)));
+    for (let p = 0; p < 5; p++) ok(pos[p] >= 5 && pos[p] <= 7, `sinonimos: posição ${p + 1} certa ${pos[p] || 0} vezes`);
+  },
+
+  textos(qs) {
+    ok(new Set(qs.map((q) => q.textId + '.' + q.item)).size === G.N, 'textos: afirmações repetidas');
+    qs.forEach((q, i) => {
+      const t = `textos Q${i + 1}`;
+      const e = G.TEXTS[q.textId].items[q.item];
+      ok(q.statement === e[0] && q.correct === e[1] && ['V', 'F', 'N'].includes(q.correct), `${t}: não corresponde ao banco`);
+      ok(q.text === G.TEXTS[q.textId].text && q.why.length > 5, `${t}: texto ou justificação em falta`);
+    });
+    // statements of the same text stay together
+    const order = qs.map((q) => q.textId);
+    ok(order.every((id, k) => k === 0 || id === order[k - 1] || !order.slice(0, k).includes(id)), 'textos: afirmações do mesmo texto separadas');
+    const h = hist(qs.map((q) => q.correct));
+    ['V', 'F', 'N'].forEach((v) => ok(h[v] >= 6, `textos: resposta ${v} aparece só ${h[v] || 0} vezes`));
+  },
+
+  numerico(qs) {
+    const kinds = hist(qs.map((q) => q.kind));
+    G.NUM_KINDS.forEach((k) => ok(kinds[k] === 5, `numerico: tipo ${k} aparece ${kinds[k] || 0} vezes`));
+    qs.forEach((q, i) => {
+      const t = `numerico Q${i + 1} (${q.kind})`;
+      const real = G.numAnswer(q);
+      ok(Number.isInteger(real) && real === q.correct, `${t}: resposta ${q.correct}, cálculo ${real}`);
+      ok(q.options.length === 5, `${t}: ${q.options.length} opções`);
+      ok(distinct(q.options.map((o) => o.label)), `${t}: etiquetas repetidas`);
+      ok(q.options.every((o) => Number.isInteger(o.value)), `${t}: opção não inteira`);
+      ok(q.table.rows.every((r) => r.length === q.table.head.length), `${t}: tabela mal formada`);
+      if (q.kind !== 'cost') ok(q.raw.data.every((row) => row.every((v) => Number.isInteger(v) && v > 0)), `${t}: valores da tabela inválidos`);
+      if (q.kind === 'share') ok(q.options.every((o) => o.value > 0 && o.value < 100), `${t}: percentagem fora de 1–99`);
+      ok(q.steps.length >= 1 && !/NaN|undefined/.test(q.steps.join(' ')), `${t}: explicação inválida`);
+    });
+    const pos = hist(qs.map((q) => G.correctIndex(q)));
+    for (let p = 0; p < 5; p++) ok(pos[p] >= 5 && pos[p] <= 7, `numerico: posição ${p + 1} certa ${pos[p] || 0} vezes`);
+  },
+
+  atencao(qs) {
+    qs.forEach((q, i) => {
+      const t = `atencao Q${i + 1}`;
+      ok(q.items.length === G.ATT_LEN, `${t}: ${q.items.length} símbolos`);
+      q.items.forEach((it) => {
+        const n = it.up + it.down;
+        ok(['d', 'p'].includes(it.l) && it.up >= 0 && it.up <= 2 && it.down >= 0 && it.down <= 2 && n >= 1 && n <= 4, `${t}: símbolo inválido`);
+      });
+      const real = count(q.items, (it) => it.l === 'd' && it.up + it.down === 2);
+      ok(q.correct === real && q.targets.length === real, `${t}: resposta ${q.correct}, contagem real ${real}`);
+      ok(q.options.length === 6, `${t}: devem existir 6 botões (0–5)`);
+    });
+    const h = hist(qs.map((q) => q.correct));
+    for (let v = 0; v <= 5; v++) ok(h[v] === 5, `atencao: resposta ${v} aparece ${h[v] || 0} vezes`);
   }
 };
 
